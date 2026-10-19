@@ -19,8 +19,10 @@ final class StatusTest extends TestCase {
 		self::assertFalse( Status::canTransition( Status::PENDING, Status::PAID ) );
 	}
 
-	public function test_cannot_reverse_a_pending_commission_directly(): void {
-		self::assertFalse( Status::canTransition( Status::PENDING, Status::REVERSED ) );
+	public function test_pending_can_be_reversed_when_order_is_cancelled(): void {
+		// پورسانت در انتظار باید وقتی سفارش لغو می‌شود باطل شود،
+		// وگرنه برای همیشه «در انتظار» می‌ماند.
+		self::assertTrue( Status::canTransition( Status::PENDING, Status::REVERSED ) );
 	}
 
 	public function test_reversed_is_final(): void {

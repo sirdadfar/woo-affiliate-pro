@@ -22,7 +22,9 @@ final class Status {
 
 	/** @var array<string, string[]> */
 	private const TRANSITIONS = array(
-		self::PENDING => array( self::APPROVED, self::REJECTED ),
+		// «در انتظار» می‌تواند مستقیم برگشت بخورد: سفارش پیش از تکمیل لغو شده
+		// و پورسانتی که هرگز تأیید نشده، باید باطل شود.
+		self::PENDING => array( self::APPROVED, self::REJECTED, self::REVERSED ),
 		self::APPROVED => array( self::PAID, self::REVERSED, self::REJECTED ),
 		self::PAID => array( self::REVERSED ),
 		self::REVERSED => array(),

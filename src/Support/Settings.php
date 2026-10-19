@@ -20,8 +20,6 @@ final class Settings {
 		return array(
 			'cookie_days'            => 30,
 			'default_rate_bp'        => 1000, // ۱۰٪
-			'rate_type'              => 'percent',
-			'fixed_amount'           => 0,
 			'include_shipping'       => false,
 			'include_tax'            => false,
 			'category_rates'         => array(), // [category_id => basis_points]

@@ -125,9 +125,13 @@ final class OrderListener {
 			return;
 		}
 
-		if ( in_array( $to, array( 'cancelled', 'refunded', 'failed' ), true ) ) {
+		if ( in_array( $to, array( 'cancelled', 'refunded' ), true ) ) {
 			$this->reverse( $orderId, sprintf( 'سفارش به وضعیت «%s» تغییر کرد.', $to ) );
 		}
+
+		// وضعیت «failed» عمداً برگشت نمی‌خورد: مشتری می‌تواند دوباره پرداخت کند
+		// و همان سفارش به processing برود. اگر اینجا reverse می‌کردیم، پورسانت
+		// برای همیشه از دست می‌رفت چون وضعیت برگشت‌خورده نهایی است.
 	}
 
 	/**

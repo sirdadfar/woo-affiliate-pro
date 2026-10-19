@@ -372,7 +372,11 @@ final class AdminMenu {
 
 	private function guard( string $capability, bool $checkNonce = false ): void {
 		if ( ! current_user_can( $capability ) ) {
-			wp_die( esc_html( 'دسترسی مجاز نیست.' ), 403 );
+			wp_die(
+				esc_html( 'دسترسی مجاز نیست.' ),
+				'',
+				array( 'response' => 403 )
+			);
 		}
 
 		if ( $checkNonce ) {
