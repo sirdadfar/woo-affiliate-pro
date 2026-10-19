@@ -1,0 +1,30 @@
+{
+  "name": "sirdadfar/woo-affiliate-pro",
+  "description": "برنامهٔ همکاری در فروش حرفه‌ای برای ووکامرس — لینک معرف، پورسانت، پنل نماینده و تسویه",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=7.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "WooAffiliatePro\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WooAffiliatePro\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "lint": "find src -name '*.php' -print0 | xargs -0 -n1 php -l"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}

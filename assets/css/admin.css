@@ -1,0 +1,6 @@
+/* پنل مدیریت — فقط جابه‌جایی‌های کوچک، ظاهر اصلی از خود وردپرس می‌آید */
+.wap-admin .wp-list-table td { vertical-align: middle; }
+.wap-admin .wp-list-table code { font-size: 12px; }
+.wap-admin form { margin: 0; }
+.wap-admin .form-table th { width: 260px; }
+.wap-admin textarea { font-family: Consolas, Monaco, monospace; direction: ltr; text-align: left; }
