@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Domain\Referral;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * ساخت و اعتبارسنجی کد معرف.
  *

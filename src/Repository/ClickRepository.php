@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Repository;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * ثبت کلیک‌های لینک معرف.
  *
@@ -28,7 +30,7 @@ final class ClickRepository {
 	): int {
 		global $wpdb;
 
-		$wpdb->insert(
+		$inserted = $wpdb->insert(
 			$this->table(),
 			array(
 				'affiliate_id' => $affiliateId,
@@ -41,7 +43,17 @@ final class ClickRepository {
 			array( '%d', '%s', '%s', '%s', '%s', '%s' )
 		);
 
+		if ( false === $inserted ) {
+			return 0;
+		}
+
 		return (int) $wpdb->insert_id;
+	}
+
+	public function countAll(): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . $this->table() );
 	}
 
 	public function countForAffiliate( int $affiliateId ): int {

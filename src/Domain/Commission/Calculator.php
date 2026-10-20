@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Domain\Commission;
 
+defined( 'ABSPATH' ) || exit;
+
 use WooAffiliatePro\Domain\Money;
 use WooAffiliatePro\Domain\Order\OrderSnapshot;
 

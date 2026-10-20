@@ -1,6 +1,1103 @@
-/* پنل مدیریت — فقط جابه‌جایی‌های کوچک، ظاهر اصلی از خود وردپرس می‌آید */
-.wap-admin .wp-list-table td { vertical-align: middle; }
-.wap-admin .wp-list-table code { font-size: 12px; }
-.wap-admin form { margin: 0; }
-.wap-admin .form-table th { width: 260px; }
-.wap-admin textarea { font-family: Consolas, Monaco, monospace; direction: ltr; text-align: left; }
+/* ==========================================================================
+   همکاری در فروش حرفه‌ای — استایل پیشخوان
+   --------------------------------------------------------------------------
+   قواعد:
+     • همهٔ سلکتورها زیر ‎.wap-admin‎ بسته شده‌اند. هیچ کلاس سراسری وردپرس
+       (‎.button‎، ‎.notice‎، ‎.widefat‎) بیرون از این ریشه بازنویسی نمی‌شود.
+     • پیش‌فرض روشن است (پیشخوان وردپرس روشن است)؛ توکن‌های تیره فقط
+       زیر ‎prefers-color-scheme: dark‎ فعال می‌شوند.
+     • RTL با ویژگی‌های منطقی نوشته شده؛ جفت left/right برای چیدمان نیست.
+     • فاصلهٔ حروف روی متن فارسی اعمال نمی‌شود (اتصال حروف را می‌شکند).
+     • فونت Vazirmatn داخل خود افزونه میزبانی می‌شود (assets/fonts، مجوز OFL)؛
+       هیچ درخواستی به Google Fonts یا CDN زده نمی‌شود.
+   ========================================================================== */
+
+/* ۰) فونت ---------------------------------------------------------------- */
+
+@font-face {
+	font-family: "Vazirmatn";
+	src: url("../fonts/Vazirmatn-Variable.woff2") format("woff2-variations");
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* ۱) توکن‌ها ------------------------------------------------------------- */
+
+.wap-admin {
+	--bg: #faf9f7;
+	--bg-2: #f1efea;
+	--surface-2: rgba(255, 255, 255, 0.9);
+	--surface-solid: #ffffff;
+	--line: #e6e1d9;
+	--line-strong: #94897a;
+	--text: #1b1815;
+	--text-muted: #57534e;
+	--text-dim: #6f685f;
+	--gold: #a16207;
+	--gold-strong: #7c4a05;
+	--gold-soft: rgba(161, 98, 7, 0.1);
+	--gold-line: rgba(161, 98, 7, 0.32);
+	--on-gold: #ffffff;
+	--success: #047857;
+	--success-soft: rgba(4, 120, 87, 0.1);
+	--danger: #b91c1c;
+	--danger-soft: rgba(185, 28, 28, 0.08);
+	--warn: #92400e;
+	--warn-soft: rgba(146, 64, 14, 0.09);
+	--info: #1d4ed8;
+	--info-soft: rgba(29, 78, 216, 0.08);
+	--ring: #7c4a05;
+	--row-hover: rgba(161, 98, 7, 0.05);
+	--check-tick: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23ffffff'%20stroke-width='3.2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%206%209%2017l-5-5'/%3E%3C/svg%3E");
+
+	--r-xs: 8px;
+	--r-sm: 12px;
+	--r-md: 16px;
+	--r-lg: 22px;
+	--r-xl: 30px;
+	--r-pill: 999px;
+
+	--s-1: 4px;
+	--s-2: 8px;
+	--s-3: 12px;
+	--s-4: 16px;
+	--s-5: 20px;
+	--s-6: 24px;
+	--s-8: 32px;
+	--s-10: 40px;
+	--s-12: 48px;
+
+	--ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+	--t-fast: 140ms;
+
+	--t-xs: 0.75rem;
+	--t-sm: 0.8125rem;
+	--t-base: 0.9375rem;
+	--t-md: 1rem;
+	--t-lg: 1.125rem;
+	--t-xl: 1.375rem;
+	--t-2xl: 1.75rem;
+
+	--font: "Vazirmatn", "IBM Plex Sans Arabic", "Noto Sans Arabic", Tahoma, "Segoe UI", system-ui, sans-serif;
+	--mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	.wap-admin {
+		--bg: #0a0908;
+		--bg-2: #12100d;
+		--surface-2: rgba(255, 255, 255, 0.07);
+		--surface-solid: #16130f;
+		--line: rgba(255, 255, 255, 0.09);
+		--line-strong: rgba(255, 255, 255, 0.36);
+		--text: #f7f5f2;
+		--text-muted: #b7b0a7;
+		--text-dim: #8b8478;
+		--gold: #d9b65a;
+		--gold-strong: #eed79a;
+		--gold-soft: rgba(217, 182, 90, 0.14);
+		--gold-line: rgba(217, 182, 90, 0.35);
+		--on-gold: #17130a;
+		--success: #6ee7b7;
+		--success-soft: rgba(110, 231, 183, 0.14);
+		--danger: #fca5a5;
+		--danger-soft: rgba(248, 113, 113, 0.14);
+		--warn: #fcd34d;
+		--warn-soft: rgba(251, 191, 36, 0.14);
+		--info: #93c5fd;
+		--info-soft: rgba(147, 197, 253, 0.14);
+		--ring: #eed79a;
+		--row-hover: rgba(255, 255, 255, 0.045);
+		--check-tick: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%2317130A'%20stroke-width='3.2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%206%209%2017l-5-5'/%3E%3C/svg%3E");
+
+		color-scheme: dark;
+	}
+}
+
+/* ۲) ریشه ---------------------------------------------------------------- */
+
+.wap-admin,
+.wap-admin *,
+.wap-admin *::before,
+.wap-admin *::after {
+	box-sizing: border-box;
+}
+
+.wrap.wap-admin {
+	position: relative;
+	isolation: isolate;
+	direction: rtl;
+	text-align: start;
+	max-width: 1400px;
+	margin-block: var(--s-4) var(--s-10);
+	margin-inline: 0;
+	padding: clamp(16px, 2.2vw, 28px);
+	color: var(--text);
+	font-family: var(--font);
+	font-size: var(--t-base);
+	font-weight: 400;
+	line-height: 1.75;
+	letter-spacing: normal;
+	background: var(--bg);
+	border: 1px solid var(--line);
+	border-radius: var(--r-xl);
+}
+
+.wrap.wap-admin::before {
+	content: "";
+	position: absolute;
+	inset-block-start: 0;
+	inset-inline: 18%;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, var(--gold-line), transparent);
+	pointer-events: none;
+}
+
+.wap-admin h1 {
+	margin: 0 0 var(--s-2);
+	padding: 0;
+	color: var(--text);
+	font-size: clamp(1.45rem, 1.1rem + 1vw, 1.9rem);
+	font-weight: 800;
+	line-height: 1.35;
+}
+
+.wap-admin p {
+	font-size: inherit;
+}
+
+.wap-admin code {
+	direction: ltr;
+	unicode-bidi: isolate;
+	padding: 2px 6px;
+	border-radius: 6px;
+	background: var(--gold-soft);
+	color: var(--gold-strong);
+	font-family: var(--mono);
+	font-size: 12px;
+}
+
+.wap-admin .wap-ico {
+	display: inline-block;
+	vertical-align: -0.15em;
+	flex: none;
+}
+
+.wap-admin :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline: 2px solid var(--ring);
+	outline-offset: 2px;
+}
+
+/* ۳) سرصفحه و فیلترها ---------------------------------------------------- */
+
+.wap-admin__head {
+	margin-block-end: var(--s-5);
+}
+
+.wap-eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 var(--s-3);
+	padding: 3px 12px;
+	border: 1px solid var(--gold-line);
+	border-radius: var(--r-pill);
+	background: var(--gold-soft);
+	color: var(--gold-strong);
+	font-size: var(--t-xs);
+	font-weight: 700;
+	line-height: 1.8;
+}
+
+.wap-admin__lede {
+	max-width: 78ch;
+	margin: 0;
+	color: var(--text-muted);
+}
+
+.wap-admin__meta {
+	margin: 0 0 var(--s-3);
+	color: var(--text-dim);
+	font-size: var(--t-sm);
+	font-variant-numeric: tabular-nums;
+}
+
+.wap-subnav {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--s-1);
+	margin-block-end: var(--s-5);
+	padding: 5px;
+	border: 1px solid var(--line);
+	border-radius: var(--r-pill);
+	background: var(--surface-2);
+}
+
+.wap-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	padding-inline: 18px;
+	border-radius: var(--r-pill);
+	color: var(--text-muted);
+	font-size: var(--t-sm);
+	font-weight: 600;
+	line-height: 1.4;
+	text-decoration: none;
+	transition:
+		background-color var(--t-fast) var(--ease),
+		color var(--t-fast) var(--ease);
+}
+
+.wap-pill:hover,
+.wap-pill:focus {
+	color: var(--text);
+	background: var(--surface-solid);
+}
+
+.wap-pill.is-active,
+.wap-pill[aria-current="page"] {
+	background: linear-gradient(180deg, var(--gold-strong), var(--gold));
+	color: var(--on-gold);
+	box-shadow: 0 8px 18px -12px rgba(124, 74, 5, 0.75);
+}
+
+.wap-pill.is-active:hover,
+.wap-pill[aria-current="page"]:hover {
+	background: linear-gradient(180deg, var(--gold-strong), var(--gold));
+	color: var(--on-gold);
+}
+
+/* ۴) کارت آمار ----------------------------------------------------------- */
+
+.wap-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	gap: var(--s-3);
+	margin-block-end: var(--s-5);
+}
+
+.wap-stat {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+	padding: var(--s-4) var(--s-5);
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	background: var(--surface-solid);
+	transition:
+		transform var(--t-fast) var(--ease),
+		border-color var(--t-fast) var(--ease);
+}
+
+.wap-stat:hover {
+	transform: translateY(-2px);
+	border-color: var(--gold-line);
+}
+
+.wap-stat__label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--text-muted);
+	font-size: var(--t-sm);
+}
+
+.wap-stat__label .wap-ico {
+	color: var(--text-dim);
+}
+
+.wap-stat__value {
+	color: var(--text);
+	font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
+	font-weight: 800;
+	line-height: 1.35;
+	font-variant-numeric: tabular-nums;
+	overflow-wrap: anywhere;
+}
+
+.wap-stat__foot {
+	color: var(--text-dim);
+	font-size: var(--t-xs);
+	font-variant-numeric: tabular-nums;
+}
+
+.wap-admin__sub {
+	display: block;
+	color: var(--text-dim);
+	font-size: var(--t-xs);
+	font-variant-numeric: tabular-nums;
+}
+
+.wap-stat--warn .wap-stat__label .wap-ico {
+	color: var(--warn);
+}
+
+.wap-stat--danger .wap-stat__label .wap-ico {
+	color: var(--danger);
+}
+
+.wap-stat--gold .wap-stat__label .wap-ico {
+	color: var(--gold);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+	.wap-stat--gold .wap-stat__value {
+		background: linear-gradient(180deg, var(--gold), var(--gold-strong));
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		-webkit-text-fill-color: transparent;
+	}
+}
+
+/* ۵) جدول فشرده ---------------------------------------------------------- */
+
+.wap-table-wrap {
+	max-height: min(70vh, 720px);
+	overflow: auto;
+	overscroll-behavior: contain;
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	background: var(--surface-solid);
+}
+
+.wap-admin .wap-table {
+	width: 100%;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+	table-layout: fixed;
+	border-collapse: separate;
+	border-spacing: 0;
+	font-size: var(--t-sm);
+	line-height: 1.7;
+}
+
+.wap-admin .wap-table thead th {
+	position: sticky;
+	inset-block-start: 0;
+	z-index: 2;
+	padding: 12px 14px;
+	border: 0;
+	border-block-end: 1px solid var(--line);
+	background: var(--bg-2);
+	color: var(--text-dim);
+	font-size: var(--t-xs);
+	font-weight: 700;
+	line-height: 1.6;
+	text-align: start;
+	white-space: nowrap;
+}
+
+.wap-admin .wap-table tbody td {
+	padding: 13px 14px;
+	border: 0;
+	border-block-end: 1px solid var(--line);
+	color: var(--text);
+	vertical-align: middle;
+	overflow-wrap: anywhere;
+}
+
+.wap-admin .wap-table tbody tr:last-child td {
+	border-block-end: 0;
+}
+
+/* بدون زبرا: فقط هاور سطر. */
+.wap-admin .wap-table tbody tr:hover td {
+	background: var(--row-hover);
+}
+
+.wap-admin .wap-table .wap-col-id {
+	width: 56px;
+	color: var(--text-dim);
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+}
+
+.wap-admin .wap-table th:last-child,
+.wap-admin .wap-table td:last-child {
+	width: 260px;
+}
+
+.wap-admin .wap-ltr {
+	direction: ltr;
+	unicode-bidi: isolate;
+	text-align: start;
+	font-size: 12px;
+}
+
+.wap-admin .wap-num {
+	font-variant-numeric: tabular-nums;
+}
+
+/* ۶) نشان وضعیت ---------------------------------------------------------- */
+
+.wap-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 10px;
+	border: 1px solid var(--line);
+	border-radius: var(--r-pill);
+	background: var(--surface-2);
+	color: var(--text-muted);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.7;
+	white-space: nowrap;
+}
+
+.wap-badge::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+	flex: none;
+}
+
+.wap-badge--active,
+.wap-badge--approved,
+.wap-badge--paid {
+	border-color: transparent;
+	background: var(--success-soft);
+	color: var(--success);
+}
+
+.wap-badge--pending,
+.wap-badge--requested {
+	border-color: transparent;
+	background: var(--warn-soft);
+	color: var(--warn);
+}
+
+.wap-badge--processing {
+	border-color: transparent;
+	background: var(--info-soft);
+	color: var(--info);
+}
+
+.wap-badge--rejected,
+.wap-badge--reversed,
+.wap-badge--disabled {
+	border-color: transparent;
+	background: var(--danger-soft);
+	color: var(--danger);
+}
+
+/* ۷) دکمه‌های عملیات ------------------------------------------------------ */
+
+.wap-row-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.wap-row-actions form {
+	display: inline-flex;
+	margin: 0;
+}
+
+.wap-admin .wap-mini {
+	min-height: 36px;
+	margin: 0;
+	padding-inline: 12px;
+	border: 1px solid var(--line-strong);
+	border-radius: var(--r-pill);
+	background: var(--surface-solid);
+	color: var(--text-muted);
+	font-family: var(--font);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.4;
+	box-shadow: none;
+	text-shadow: none;
+	transition:
+		transform var(--t-fast) var(--ease),
+		border-color var(--t-fast) var(--ease);
+}
+
+.wap-admin .wap-mini:hover {
+	transform: translateY(-1px);
+	border-color: var(--gold-line);
+	color: var(--text);
+	background: var(--surface-solid);
+}
+
+.wap-admin .wap-mini--success {
+	border-color: transparent;
+	background: var(--success-soft);
+	color: var(--success);
+}
+
+.wap-admin .wap-mini--danger {
+	border-color: transparent;
+	background: var(--danger-soft);
+	color: var(--danger);
+}
+
+.wap-admin .wap-mini--success:hover,
+.wap-admin .wap-mini--danger:hover {
+	border-color: currentColor;
+	background: var(--surface-solid);
+}
+
+.wap-payout-form {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+}
+
+.wap-ref-input {
+	width: 9.5rem;
+	min-height: 36px;
+	padding-block: 6px;
+	padding-inline: 9px;
+	border: 1px solid var(--line-strong);
+	border-radius: var(--r-xs);
+	background: var(--surface-solid);
+	color: var(--text);
+	font-family: var(--mono);
+	font-size: 12px;
+	direction: ltr;
+	text-align: start;
+}
+
+.wap-ref-input:focus {
+	border-color: var(--gold);
+	box-shadow: 0 0 0 3px var(--gold-soft);
+}
+
+.wap-dest {
+	display: block;
+	color: var(--text-muted);
+	font-size: var(--t-xs);
+}
+
+.wap-admin .wap-dest__value {
+	display: inline-block;
+	max-width: 100%;
+	margin-block-start: 3px;
+	direction: ltr;
+	unicode-bidi: isolate;
+	overflow-wrap: anywhere;
+}
+
+.wap-dest__missing {
+	display: block;
+	margin-block-start: 3px;
+	color: var(--warn);
+	font-size: var(--t-xs);
+	font-weight: 600;
+}
+
+/* صفحه‌بندی: پیوندها و وضعیت جاری، با هدف لمسی ۴۴px. */
+.wap-pager {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-block-start: var(--s-5);
+}
+
+.wap-pager__step,
+.wap-pager__link,
+.wap-pager__current {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	padding-inline: 12px;
+	border: 1px solid var(--line);
+	border-radius: var(--r-pill);
+	color: var(--text-muted);
+	font-size: var(--t-sm);
+	font-weight: 600;
+	line-height: 1;
+	text-decoration: none;
+	font-variant-numeric: tabular-nums;
+}
+
+.wap-pager__link:hover,
+.wap-pager__step:hover {
+	border-color: var(--gold-line);
+	color: var(--text);
+	background: var(--surface-solid);
+}
+
+.wap-pager__current {
+	border-color: transparent;
+	background: linear-gradient(180deg, var(--gold-strong), var(--gold));
+	color: var(--on-gold);
+}
+
+.wap-pager__step.is-disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.wap-pager__gap {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 24px;
+	color: var(--text-dim);
+}
+
+/* ۸) تنظیمات ------------------------------------------------------------- */
+
+.wap-admin__panel {
+	padding: clamp(16px, 2.4vw, 28px);
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	background: var(--surface-solid);
+}
+
+.wap-admin .form-table {
+	width: 100%;
+	margin-block: 0;
+	border-collapse: collapse;
+}
+
+.wap-admin .form-table th {
+	width: 260px;
+	padding-block: 16px;
+	padding-inline: 0 var(--s-4);
+	color: var(--text);
+	font-size: var(--t-sm);
+	font-weight: 600;
+	line-height: 1.7;
+	text-align: start;
+	vertical-align: top;
+}
+
+.wap-admin .form-table td {
+	padding-block: 12px;
+	padding-inline: 0;
+	color: var(--text);
+	line-height: 1.7;
+	vertical-align: top;
+}
+
+.wap-admin .form-table tr + tr:not(.wap-section-row) > th,
+.wap-admin .form-table tr + tr:not(.wap-section-row) > td {
+	border-block-start: 1px solid var(--line);
+}
+
+.wap-admin .form-table tr.wap-section-row + tr > th,
+.wap-admin .form-table tr.wap-section-row + tr > td {
+	border-block-start: 0;
+}
+
+.wap-admin .wap-section-row td {
+	padding: var(--s-6) 0 var(--s-2);
+	border: 0;
+}
+
+.wap-admin .wap-form__section {
+	margin: 0;
+	padding-block-end: 6px;
+	border-block-end: 1px solid var(--line);
+	color: var(--gold-strong);
+	font-size: var(--t-xs);
+	font-weight: 700;
+	line-height: 1.7;
+}
+
+.wap-admin .form-table input[type="text"],
+.wap-admin .form-table input[type="number"],
+.wap-admin .form-table input[type="tel"],
+.wap-admin .form-table input[type="url"],
+.wap-admin .form-table textarea,
+.wap-admin .form-table select {
+	min-height: 44px;
+	padding-block: 8px;
+	padding-inline: 12px;
+	border: 1px solid var(--line-strong);
+	border-radius: var(--r-sm);
+	background: var(--surface-solid);
+	color: var(--text);
+	font-family: var(--font);
+	font-size: var(--t-base);
+	line-height: 1.6;
+	box-shadow: none;
+	transition:
+		border-color var(--t-fast) var(--ease),
+		box-shadow var(--t-fast) var(--ease);
+}
+
+.wap-admin .form-table textarea {
+	min-height: 96px;
+	direction: ltr;
+	text-align: start;
+	font-family: var(--mono);
+	font-size: 13px;
+}
+
+.wap-admin .form-table input:hover,
+.wap-admin .form-table textarea:hover,
+.wap-admin .form-table select:hover {
+	border-color: var(--gold-line);
+}
+
+.wap-admin .form-table input:focus,
+.wap-admin .form-table textarea:focus,
+.wap-admin .form-table select:focus {
+	border-color: var(--gold);
+	box-shadow: 0 0 0 4px var(--gold-soft);
+}
+
+.wap-admin .form-table .regular-text {
+	width: min(100%, 26rem);
+}
+
+.wap-admin .form-table label {
+	color: var(--text);
+	font-size: var(--t-sm);
+}
+
+.wap-admin .description {
+	margin-block: 6px 0;
+	color: var(--text-dim);
+	font-size: var(--t-xs);
+	line-height: 1.8;
+}
+
+.wap-admin .description code {
+	font-size: 11px;
+}
+
+/* چک‌باکس: اندازهٔ ۲۰px، تیک SVG درون‌خطی، حالت انتخاب‌شدهٔ طلایی. */
+.wap-admin input[type="checkbox"] {
+	appearance: none;
+	-webkit-appearance: none;
+	position: relative;
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	min-height: 20px;
+	margin-block: 0;
+	margin-inline: 0 6px;
+	padding: 0;
+	border: 1px solid var(--line-strong);
+	border-radius: 6px;
+	background-color: var(--surface-solid);
+	vertical-align: -0.35em;
+	cursor: pointer;
+	transition:
+		border-color var(--t-fast) var(--ease),
+		background-color var(--t-fast) var(--ease);
+}
+
+.wap-admin input[type="checkbox"]:hover {
+	border-color: var(--gold-line);
+}
+
+.wap-admin input[type="checkbox"]:checked {
+	border-color: transparent;
+	background-image:
+		var(--check-tick),
+		linear-gradient(180deg, var(--gold-strong), var(--gold));
+	background-repeat: no-repeat, no-repeat;
+	background-position: center, center;
+	background-size: 14px 14px, 100% 100%;
+}
+
+.wap-admin input[type="checkbox"]:focus-visible {
+	outline: 2px solid var(--ring);
+	outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+	.wap-admin input[type="checkbox"] {
+		appearance: auto;
+		-webkit-appearance: auto;
+	}
+}
+
+.wap-savebar {
+	position: sticky;
+	inset-block-end: 0;
+	z-index: 3;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--s-3) var(--s-4);
+	margin-block-start: var(--s-6);
+	padding-block: var(--s-4);
+	border-block-start: 1px solid var(--line);
+	background: var(--surface-solid);
+}
+
+.wap-savebar__note {
+	margin: 0;
+	color: var(--text-dim);
+	font-size: var(--t-xs);
+	line-height: 1.7;
+}
+
+/* دکمه‌های خود وردپرس، فقط در همین صفحه و با همان کلاس‌های بومی. */
+.wap-admin .button-primary {
+	min-height: 44px;
+	padding-inline: var(--s-6);
+	border: 0;
+	border-radius: var(--r-pill);
+	background: linear-gradient(180deg, var(--gold-strong), var(--gold));
+	color: var(--on-gold);
+	font-family: var(--font);
+	font-weight: 700;
+	text-shadow: none;
+	box-shadow: 0 10px 24px -14px rgba(124, 74, 5, 0.7);
+}
+
+.wap-admin .button-primary:hover,
+.wap-admin .button-primary:focus {
+	border: 0;
+	background: linear-gradient(180deg, var(--gold-strong), var(--gold));
+	color: var(--on-gold);
+}
+
+/* ۹) پیام فلش ------------------------------------------------------------ */
+
+.wap-admin .notice.wap-flash {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--s-3);
+	margin: 0 0 var(--s-5);
+	padding: var(--s-4);
+	border: 0;
+	border-radius: var(--r-md);
+	background: var(--success-soft);
+	color: var(--text);
+	box-shadow: none;
+}
+
+.wap-admin .notice.notice-error.wap-flash {
+	background: var(--danger-soft);
+}
+
+.wap-admin .notice.wap-flash::before {
+	content: none;
+}
+
+.wap-admin .wap-flash__icon {
+	display: inline-flex;
+	margin-block-start: 2px;
+	color: var(--success);
+}
+
+.wap-admin .notice-error .wap-flash__icon {
+	color: var(--danger);
+}
+
+.wap-admin .notice.wap-flash p {
+	margin: 0;
+	padding: 0;
+	color: inherit;
+	font-size: var(--t-base);
+	line-height: 1.7;
+}
+
+/* ۱۰) حالت خالی ---------------------------------------------------------- */
+
+.wap-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--s-2);
+	padding: var(--s-10) var(--s-6);
+	border: 1px dashed var(--line-strong);
+	border-radius: var(--r-md);
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.wap-empty > .wap-ico {
+	color: var(--text-dim);
+}
+
+.wap-empty__title {
+	margin: 0;
+	color: var(--text);
+	font-weight: 700;
+}
+
+.wap-empty__hint {
+	margin: 0;
+	max-width: 52ch;
+	color: var(--text-dim);
+	font-size: var(--t-xs);
+	line-height: 1.8;
+}
+
+/* ۱۱) واکنش‌گرایی --------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+	.wap-admin .wap-table th:last-child,
+	.wap-admin .wap-table td:last-child {
+		width: 220px;
+	}
+}
+
+@media (max-width: 782px) {
+	.wrap.wap-admin {
+		padding: var(--s-4) var(--s-3);
+		border-radius: var(--r-lg);
+	}
+
+	.wap-admin .form-table,
+	.wap-admin .form-table tbody,
+	.wap-admin .form-table tr,
+	.wap-admin .form-table th,
+	.wap-admin .form-table td {
+		display: block;
+		width: auto;
+	}
+
+	.wap-admin .form-table th {
+		padding-block: 14px 0;
+		padding-inline: 0;
+	}
+
+	.wap-admin .form-table td {
+		padding-block: 4px 14px;
+	}
+
+	.wap-admin .form-table tr + tr:not(.wap-section-row) > th {
+		border-block-start: 1px solid var(--line);
+	}
+
+	.wap-admin .form-table tr + tr:not(.wap-section-row) > td {
+		border-block-start: 0;
+	}
+
+	.wap-admin .form-table tr.wap-section-row > td {
+		padding-block: var(--s-5) var(--s-2);
+		border-block-start: 0;
+	}
+}
+
+@media (max-width: 760px) {
+	.wap-table-wrap {
+		max-height: none;
+		overflow: visible;
+		border: 0;
+		background: transparent;
+	}
+
+	.wap-admin .wap-table,
+	.wap-admin .wap-table tbody,
+	.wap-admin .wap-table tr,
+	.wap-admin .wap-table td {
+		display: block;
+		width: 100%;
+	}
+
+	.wap-admin .wap-table thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+	}
+
+	.wap-admin .wap-table tr {
+		margin-block-end: var(--s-3);
+		padding: var(--s-3);
+		border: 1px solid var(--line);
+		border-radius: var(--r-md);
+		background: var(--surface-solid);
+	}
+
+	.wap-admin .wap-table tbody td,
+	.wap-admin .wap-table .wap-col-id,
+	.wap-admin .wap-table td:last-child {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--s-4);
+		width: auto;
+		padding-block: 8px;
+		padding-inline: 0;
+		border-block-end: 1px dashed var(--line);
+		text-align: end;
+	}
+
+	.wap-admin .wap-table tbody tr:last-child td {
+		border-block-end: 1px dashed var(--line);
+	}
+
+	.wap-admin .wap-table tr td:last-child {
+		border-block-end: 0;
+	}
+
+	.wap-admin .wap-table td::before {
+		content: attr(data-label);
+		flex: none;
+		color: var(--text-dim);
+		font-size: var(--t-xs);
+		font-weight: 700;
+		text-align: start;
+	}
+
+	.wap-admin .wap-table td[colspan] {
+		display: block;
+		padding: 0;
+		border-block-end: 0;
+		text-align: center;
+	}
+
+	.wap-admin .wap-table td[colspan]::before {
+		content: none;
+	}
+
+	.wap-admin .wap-table tbody tr:hover td {
+		background: transparent;
+	}
+
+	.wap-admin .wap-row-actions {
+		justify-content: flex-end;
+	}
+
+	.wap-payout-form {
+		flex: 1 1 100%;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+	}
+
+	.wap-ref-input {
+		flex: 1 1 10rem;
+		width: auto;
+	}
+}
+
+/* ۱۲) حرکت کمتر ---------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+	.wap-admin *,
+	.wap-admin *::before,
+	.wap-admin *::after {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+	}
+
+	.wap-stat:hover,
+	.wap-admin .wap-mini:hover {
+		transform: none;
+	}
+}

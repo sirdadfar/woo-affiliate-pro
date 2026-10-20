@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro;
 
+defined( 'ABSPATH' ) || exit;
+
 use WooAffiliatePro\Install\Installer;
 use WooAffiliatePro\Integration\Admin\AdminMenu;
 use WooAffiliatePro\Integration\Cron;

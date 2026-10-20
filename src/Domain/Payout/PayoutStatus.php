@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Domain\Payout;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * وضعیت درخواست تسویه.
  */

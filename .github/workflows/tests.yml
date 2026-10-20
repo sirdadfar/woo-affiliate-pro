@@ -23,6 +23,12 @@ jobs:
           tools: composer
           coverage: none
 
+      - name: Validate Composer
+        run: composer validate --strict --no-check-publish
+
+      - name: Audit dependencies
+        run: composer audit --locked
+
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 

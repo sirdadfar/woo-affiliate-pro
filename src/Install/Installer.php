@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Install;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * نصب، ارتقا و حذف جداول.
  *
@@ -38,6 +40,7 @@ final class Installer {
 
 		self::createTables();
 		self::seedOptions();
+		self::scheduleCron();
 		update_option( 'wap_db_version', WAP_DB_VERSION, false );
 	}
 
@@ -78,7 +81,8 @@ final class Installer {
 			landing_url VARCHAR(255) NOT NULL DEFAULT '',
 			created_at DATETIME NOT NULL,
 			PRIMARY KEY  (id),
-			KEY affiliate_created (affiliate_id, created_at)
+			KEY affiliate_created (affiliate_id, created_at),
+			KEY created_at (created_at)
 		) {$charset};";
 
 		$commissions = "CREATE TABLE {$prefix}wap_commissions (
@@ -122,9 +126,19 @@ final class Installer {
 
 	private static function seedOptions(): void {
 		$existing = get_option( 'wap_settings' );
+		$defaults = \WooAffiliatePro\Support\Settings::defaults();
 
 		if ( false === $existing || ! is_array( $existing ) ) {
-			add_option( 'wap_settings', \WooAffiliatePro\Support\Settings::defaults(), '', false );
+			add_option( 'wap_settings', $defaults, '', false );
+
+			return;
+		}
+
+		// کلیدهای جدیدِ نسخه‌های بعدی باید بدون از دست رفتن تنظیمات فعلی اضافه شوند.
+		$merged = array_merge( $defaults, $existing );
+
+		if ( $merged !== $existing ) {
+			update_option( \WooAffiliatePro\Support\Settings::OPTION, $merged, false );
 		}
 	}
 

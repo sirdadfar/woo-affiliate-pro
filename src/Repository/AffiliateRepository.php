@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Repository;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * دسترسی به جدول نمایندگان.
  *
@@ -91,6 +93,41 @@ final class AffiliateRepository {
 	}
 
 	/**
+	 * چند نماینده را با یک کوئری می‌خواند تا فهرست‌های پیشخوان N+1 نشوند.
+	 *
+	 * @param int[] $ids
+	 *
+	 * @return array<int, array<string, mixed>> کلید = شناسهٔ نماینده
+	 */
+	public function findByIds( array $ids ): array {
+		global $wpdb;
+
+		$ids = array_values( array_unique( array_filter( array_map( 'intval', $ids ) ) ) );
+
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM ' . $this->table() . " WHERE id IN ({$placeholders})",
+				$ids
+			),
+			ARRAY_A
+		);
+
+		$map = array();
+
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$map[ (int) $row['id'] ] = $row;
+		}
+
+		return $map;
+	}
+
+	/**
 	 * @param array<string, mixed> $data
 	 */
 	public function create( array $data ): int {
@@ -114,7 +151,7 @@ final class AffiliateRepository {
 
 		$row = array_merge( $defaults, $data );
 
-		$wpdb->insert(
+		$inserted = $wpdb->insert(
 			$this->table(),
 			array(
 				'user_id'           => (int) $row['user_id'],
@@ -131,6 +168,10 @@ final class AffiliateRepository {
 			),
 			array( '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s' )
 		);
+
+		if ( false === $inserted ) {
+			return 0;
+		}
 
 		return (int) $wpdb->insert_id;
 	}
@@ -181,7 +222,9 @@ final class AffiliateRepository {
 	public function paginate( int $page = 1, int $perPage = 20, string $status = '' ): array {
 		global $wpdb;
 
-		$offset = max( 0, ( $page - 1 ) * $perPage );
+		$page    = max( 1, $page );
+		$perPage = max( 1, min( 200, $perPage ) );
+		$offset  = ( $page - 1 ) * $perPage;
 
 		if ( '' !== $status ) {
 			$rows = $wpdb->get_results(

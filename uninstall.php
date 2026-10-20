@@ -12,15 +12,40 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
-$settings = get_option( 'wap_settings', array() );
+global $wpdb;
 
+$settings     = get_option( 'wap_settings', array() );
 $shouldDelete = is_array( $settings ) && ! empty( $settings['delete_data_on_uninstall'] );
+
+wp_clear_scheduled_hook( 'wap_daily_maintenance' );
+
+/*
+ * قفل‌ها و transientها حتی وقتی دادهٔ مالی نگه داشته می‌شود باید پاک شوند؛
+ * در غیر این صورت بعد از نصب دوباره، یک قفل کهنه تا TTL خودش باقی می‌ماند.
+ */
+$patterns = array(
+	$wpdb->esc_like( '_transient_wap_click_' ) . '%',
+	$wpdb->esc_like( '_transient_timeout_wap_click_' ) . '%',
+	$wpdb->esc_like( '_transient_wap_rl_' ) . '%',
+	$wpdb->esc_like( '_transient_timeout_wap_rl_' ) . '%',
+	$wpdb->esc_like( 'wap_lock_' ) . '%',
+);
+
+$where = array();
+
+foreach ( $patterns as $pattern ) {
+	$where[] = $wpdb->prepare( 'option_name LIKE %s', $pattern );
+}
+
+if ( ! empty( $where ) ) {
+	$wpdb->query( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- شرط‌ها همین‌جا با prepare ساخته شده‌اند.
+		'DELETE FROM ' . $wpdb->options . ' WHERE ' . implode( ' OR ', $where )
+	);
+}
 
 if ( ! $shouldDelete ) {
 	return;
 }
-
-global $wpdb;
 
 $tables = array(
 	$wpdb->prefix . 'wap_commissions',
@@ -36,5 +61,3 @@ foreach ( $tables as $table ) {
 
 delete_option( 'wap_settings' );
 delete_option( 'wap_db_version' );
-
-wp_clear_scheduled_hook( 'wap_daily_maintenance' );

@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Integration;
 
+defined( 'ABSPATH' ) || exit;
+
 use WooAffiliatePro\Domain\Referral\CookiePolicy;
 use WooAffiliatePro\Repository\AffiliateRepository;
 use WooAffiliatePro\Repository\ClickRepository;
@@ -69,26 +71,43 @@ final class ReferralTracker {
 
 		$cookieName = $this->policy->cookieName();
 
-		$existing = isset( $_COOKIE[ $cookieName ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ $cookieName ] ) ) : null;
-		$age      = isset( $_COOKIE[ $cookieName . '_ts' ] ) ? ( time() - (int) $_COOKIE[ $cookieName . '_ts' ] ) : 0;
+		$existing = isset( $_COOKIE[ $cookieName ] ) && is_string( $_COOKIE[ $cookieName ] )
+			? sanitize_text_field( wp_unslash( $_COOKIE[ $cookieName ] ) )
+			: null;
+		$age      = isset( $_COOKIE[ $cookieName . '_ts' ] ) && is_scalar( $_COOKIE[ $cookieName . '_ts' ] )
+			? ( time() - (int) $_COOKIE[ $cookieName . '_ts' ] )
+			: 0;
 
 		if ( $this->policy->shouldReplace( $existing, $code, $age ) ) {
 			$this->setCookie( $cookieName, $code );
 			$this->setCookie( $cookieName . '_ts', (string) time() );
 		}
 
-		// فقط یک کلیک در هر ۳۰ ثانیه ثبت می‌شود تا رفرش صفحه، آمار را باد نکند.
-		$lastClick = (int) get_transient( 'wap_click_' . $affiliate['id'] );
-		if ( $lastClick < time() - 30 ) {
+		$userAgent = isset( $_SERVER['HTTP_USER_AGENT'] ) && is_string( $_SERVER['HTTP_USER_AGENT'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
+			: '';
+		$ip        = $this->clientIp();
+
+		/*
+		 * هر بازدیدکننده در هر ۶۰ ثانیه فقط یک کلیک ثبت می‌کند تا رفرش صفحه
+		 * آمار را باد نکند؛ اما کلیک هم‌زمان دو کاربر مختلف نادیده گرفته
+		 * نمی‌شود. کلید = شناسهٔ نماینده + هش کوتاه IP و User-Agent.
+		 * (کلید سراسری قبلی، کلیک همهٔ کاربران را در یک بازهٔ ۳۰ ثانیه‌ای
+		 *  در یک ردیف جمع می‌کرد و آمار را کم‌نمایش می‌داد.)
+		 */
+		$visitor  = substr( md5( $ip . '|' . $userAgent ), 0, 16 );
+		$clickKey = 'wap_click_' . (int) $affiliate['id'] . '_' . $visitor;
+
+		if ( false === get_transient( $clickKey ) ) {
 			$this->clicks->log(
 				(int) $affiliate['id'],
-				$this->clientIp(),
-				isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '',
-				isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
+				$ip,
+				$userAgent,
+				isset( $_SERVER['HTTP_REFERER'] ) && is_string( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
 				home_url( add_query_arg( array() ) ),
 				wp_salt( 'auth' )
 			);
-			set_transient( 'wap_click_' . $affiliate['id'], time(), 60 );
+			set_transient( $clickKey, 1, 60 );
 		}
 	}
 
@@ -99,6 +118,10 @@ final class ReferralTracker {
 		$cookieName = $this->policy->cookieName();
 
 		if ( ! isset( $_COOKIE[ $cookieName ] ) ) {
+			return null;
+		}
+
+		if ( ! is_string( $_COOKIE[ $cookieName ] ) ) {
 			return null;
 		}
 
@@ -132,6 +155,10 @@ final class ReferralTracker {
 		// پشت کلودفلر/پروکسی، REMOTE_ADDR خود پروکسی است؛ این هدرها فقط برای آمار است.
 		foreach ( array( 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' ) as $key ) {
 			if ( empty( $_SERVER[ $key ] ) ) {
+				continue;
+			}
+
+			if ( ! is_scalar( $_SERVER[ $key ] ) ) {
 				continue;
 			}
 

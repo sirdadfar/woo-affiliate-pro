@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Support;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * دسترسی تایپ‌دار به تنظیمات، با مقادیر پیش‌فرض در یک جا.
  *

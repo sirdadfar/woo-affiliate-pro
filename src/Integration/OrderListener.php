@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Integration;
 
+defined( 'ABSPATH' ) || exit;
+
 use WooAffiliatePro\Domain\Commission\Calculator;
 use WooAffiliatePro\Domain\Commission\CommissionPolicy;
 use WooAffiliatePro\Domain\Commission\Status;
@@ -47,8 +49,32 @@ final class OrderListener {
 
 	public function register(): void {
 		add_action( 'woocommerce_checkout_create_order', array( $this, 'attachAffiliate' ), 10, 2 );
+
+		// چک‌اوت بلوکی (Store API) از مسیر کلاسیک `WC_Checkout` رد نمی‌شود،
+		// پس هوک قدیمی به‌تنهایی کافی نیست. این هوک نقطهٔ رسمی افزودن متادیتا
+		// به سفارش در چک‌اوت بلوکی است و کوکی معرف در همان درخواست در دسترس است.
+		add_action( 'woocommerce_store_api_checkout_update_order_from_request', array( $this, 'attachAffiliateFromBlocks' ), 10, 2 );
+
 		add_action( 'woocommerce_order_status_changed', array( $this, 'onStatusChange' ), 10, 4 );
 		add_action( 'woocommerce_order_refunded', array( $this, 'onRefund' ), 10, 2 );
+	}
+
+	/**
+	 * نسخهٔ چک‌اوت بلوکی؛ درخواست REST استفاده نمی‌شود، فقط سفارش.
+	 *
+	 * @param \WC_Order            $order
+	 * @param \WP_REST_Request     $request
+	 */
+	public function attachAffiliateFromBlocks( $order, $request = null ): void {
+		if ( ! $order instanceof \WC_Order ) {
+			return;
+		}
+
+		if ( (int) $order->get_meta( self::META_AFFILIATE ) > 0 ) {
+			return;
+		}
+
+		$this->attachAffiliate( $order, array() );
 	}
 
 	/**
@@ -145,11 +171,15 @@ final class OrderListener {
 			return;
 		}
 
-		$refundTotal = (float) $order->get_total_refunded();
-		$orderTotal  = (float) $order->get_total();
+		$currency = (string) $order->get_currency();
+		$decimals = function_exists( 'wc_get_price_decimals' ) ? (int) wc_get_price_decimals() : 0;
+
+		// مقایسه در واحد پول صحیح انجام می‌شود، نه با اختلاف شناور ۰.۹۹.
+		$refundTotal = Money::fromFloat( (float) $order->get_total_refunded(), $currency, $decimals )->amount();
+		$orderTotal  = Money::fromFloat( (float) $order->get_total(), $currency, $decimals )->amount();
 
 		// استرداد جزئی، پورسانت را کامل باطل نمی‌کند؛ فقط استرداد کامل باعث برگشت می‌شود.
-		if ( $orderTotal > 0 && $refundTotal >= $orderTotal * 0.99 ) {
+		if ( $orderTotal > 0 && $refundTotal >= $orderTotal ) {
 			$this->reverse( (int) $orderId, 'کل مبلغ سفارش مسترد شد.' );
 		}
 	}
@@ -173,42 +203,54 @@ final class OrderListener {
 			return;
 		}
 
-		$policy = $this->buildPolicy( $affiliate );
-		$snapshot = $this->buildSnapshot( $order );
+		try {
+			$policy   = $this->buildPolicy( $affiliate, (string) $order->get_currency() );
+			$snapshot = $this->buildSnapshot( $order );
 
-		if ( null === $snapshot ) {
-			return;
+			if ( null === $snapshot ) {
+				return;
+			}
+
+			$breakdown = ( new Calculator() )->calculate( $snapshot, $policy );
+
+			if ( $breakdown->total()->isZero() || $breakdown->total()->isNegative() ) {
+				return;
+			}
+
+			$created = $this->commissions->create(
+				array(
+					'affiliate_id'      => $affiliateId,
+					'order_id'          => $orderId,
+					'amount'            => $breakdown->total()->amount(),
+					'base_amount'       => $this->orderBaseTotal( $order ),
+					'rate_basis_points' => (int) $affiliate['rate_basis_points'],
+					'currency'          => $order->get_currency(),
+					'status'            => Status::PENDING,
+					'note'              => (string) wp_json_encode( $breakdown->toArray() ),
+				)
+			);
+
+			if ( $created <= 0 ) {
+				// کلید یکتای (order_id, affiliate_id) ممکن است در درخواست هم‌زمان برنده شده باشد.
+				$this->log( sprintf( 'ثبت پورسانت سفارش #%d انجام نشد (احتمال ثبت هم‌زمان).', $orderId ) );
+
+				return;
+			}
+
+			$order->update_meta_data( self::META_TOTAL, $breakdown->total()->amount() );
+			$order->save();
+
+			$order->add_order_note(
+				sprintf(
+					'پورسانت نماینده ثبت شد: %s (نماینده #%d)',
+					$breakdown->total()->format(),
+					$affiliateId
+				)
+			);
+		} catch ( \Throwable $e ) {
+			// خطای محاسبه یا ذخیره نباید پرداخت/تکمیل سفارش را بشکند؛ برای بررسی لاگ می‌شود.
+			$this->log( sprintf( 'محاسبهٔ پورسانت سفارش #%d ناموفق بود: %s', $orderId, $e->getMessage() ) );
 		}
-
-		$breakdown = ( new Calculator() )->calculate( $snapshot, $policy );
-
-		if ( $breakdown->total()->isZero() || $breakdown->total()->isNegative() ) {
-			return;
-		}
-
-		$this->commissions->create(
-			array(
-				'affiliate_id'      => $affiliateId,
-				'order_id'          => $orderId,
-				'amount'            => $breakdown->total()->amount(),
-				'base_amount'       => $this->orderBaseTotal( $order ),
-				'rate_basis_points' => (int) $affiliate['rate_basis_points'],
-				'currency'          => $order->get_currency(),
-				'status'            => Status::PENDING,
-				'note'              => (string) wp_json_encode( $breakdown->toArray() ),
-			)
-		);
-
-		$order->update_meta_data( self::META_TOTAL, $breakdown->total()->amount() );
-		$order->save();
-
-		$order->add_order_note(
-			sprintf(
-				'پورسانت نماینده ثبت شد: %s (نماینده #%d)',
-				$breakdown->total()->format(),
-				$affiliateId
-			)
-		);
 	}
 
 	private function approve( int $orderId ): void {
@@ -218,8 +260,13 @@ final class OrderListener {
 			return;
 		}
 
-		if ( Status::canTransition( (string) $row['status'], Status::APPROVED ) ) {
-			$this->commissions->updateStatus( (int) $row['id'], Status::APPROVED );
+		try {
+			if ( Status::canTransition( (string) $row['status'], Status::APPROVED ) ) {
+				$this->commissions->updateStatus( (int) $row['id'], Status::APPROVED );
+			}
+		} catch ( \InvalidArgumentException $e ) {
+			// وضعیت ناشناخته در ردیف قدیمی نباید تغییر وضعیت سفارش را بشکند.
+			$this->log( sprintf( 'تأیید پورسانت سفارش #%d ممکن نبود: %s', $orderId, $e->getMessage() ) );
 		}
 	}
 
@@ -230,16 +277,21 @@ final class OrderListener {
 			return;
 		}
 
-		if ( Status::canTransition( (string) $row['status'], Status::REVERSED ) ) {
-			$this->commissions->updateStatus( (int) $row['id'], Status::REVERSED, $note );
+		try {
+			if ( Status::canTransition( (string) $row['status'], Status::REVERSED ) ) {
+				$this->commissions->updateStatus( (int) $row['id'], Status::REVERSED, $note );
+			}
+		} catch ( \InvalidArgumentException $e ) {
+			$this->log( sprintf( 'برگشت پورسانت سفارش #%d ممکن نبود: %s', $orderId, $e->getMessage() ) );
 		}
 	}
 
 	/**
 	 * @param array<string, mixed> $affiliate
 	 */
-	private function buildPolicy( array $affiliate ): CommissionPolicy {
-		$rateBp = (int) $affiliate['rate_basis_points'];
+	private function buildPolicy( array $affiliate, string $currency ): CommissionPolicy {
+		$decimals = function_exists( 'wc_get_price_decimals' ) ? (int) wc_get_price_decimals() : 0;
+		$rateBp   = (int) $affiliate['rate_basis_points'];
 		if ( $rateBp <= 0 ) {
 			$rateBp = Settings::int( 'default_rate_bp' );
 		}
@@ -266,7 +318,7 @@ final class OrderListener {
 			Settings::bool( 'include_tax' ),
 			$categoryRates,
 			Settings::idList( 'exclude_products' ),
-			$max > 0 ? Money::of( $max ) : null,
+			$max > 0 ? Money::of( $max, $currency, $decimals ) : null,
 			Settings::idList( 'exclude_categories' )
 		);
 	}
@@ -308,6 +360,12 @@ final class OrderListener {
 			$order->get_currency(),
 			wc_get_price_decimals()
 		);
+	}
+
+	private function log( string $message ): void {
+		if ( function_exists( 'wc_get_logger' ) ) {
+			wc_get_logger()->error( $message, array( 'source' => 'woo-affiliate-pro' ) );
+		}
 	}
 
 	private function orderBaseTotal( $order ): int {

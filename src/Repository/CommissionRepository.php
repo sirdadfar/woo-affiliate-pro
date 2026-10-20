@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Repository;
 
+defined( 'ABSPATH' ) || exit;
+
 use WooAffiliatePro\Domain\Commission\Status;
 
 /**
@@ -56,7 +58,7 @@ final class CommissionRepository {
 
 		$now = current_time( 'mysql', true );
 
-		$wpdb->insert(
+		$inserted = $wpdb->insert(
 			$this->table(),
 			array(
 				'affiliate_id'      => (int) $data['affiliate_id'],
@@ -72,6 +74,10 @@ final class CommissionRepository {
 			),
 			array( '%d', '%d', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s' )
 		);
+
+		if ( false === $inserted ) {
+			return 0;
+		}
 
 		return (int) $wpdb->insert_id;
 	}
@@ -148,12 +154,54 @@ final class CommissionRepository {
 	}
 
 	/**
+	 * شمارش کل یا یک وضعیت، برای صفحه‌بندی و کاشی‌های آمار.
+	 */
+	public function count( string $status = '' ): int {
+		global $wpdb;
+
+		if ( '' !== $status ) {
+			return (int) $wpdb->get_var(
+				$wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->table() . ' WHERE status = %s', $status )
+			);
+		}
+
+		return (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . $this->table() );
+	}
+
+	/**
+	 * جمع و تعداد هر وضعیت در یک کوئری (برای پیشخوان).
+	 *
+	 * @return array<string, array{count: int, amount: int}>
+	 */
+	public function stats(): array {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			'SELECT status, COUNT(*) AS row_count, COALESCE(SUM(amount), 0) AS amount FROM ' . $this->table() . ' GROUP BY status',
+			ARRAY_A
+		);
+
+		$stats = array();
+
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$stats[ (string) $row['status'] ] = array(
+				'count'  => (int) $row['row_count'],
+				'amount' => (int) $row['amount'],
+			);
+		}
+
+		return $stats;
+	}
+
+	/**
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function paginate( int $page = 1, int $perPage = 30, string $status = '' ): array {
 		global $wpdb;
 
-		$offset = max( 0, ( $page - 1 ) * $perPage );
+		$page    = max( 1, $page );
+		$perPage = max( 1, min( 200, $perPage ) );
+		$offset  = ( $page - 1 ) * $perPage;
 
 		if ( '' !== $status ) {
 			$rows = $wpdb->get_results(

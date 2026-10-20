@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WooAffiliatePro\Domain;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * مقدار پولی با عدد صحیح (کوچک‌ترین واحد پول) تا خطای شناور هرگز رخ ندهد.
  *

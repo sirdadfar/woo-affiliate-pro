@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Affiliate Pro for WooCommerce
  * Plugin URI:        https://github.com/sirdadfar/woo-affiliate-pro
- * Description:       برنامهٔ کامل همکاری در فروش برای ووکامرس: لینک معرف، ردیابی کلیک، پورسانت چندسطحی بر اساس دسته‌بندی، پنل نماینده و مدیریت تسویه.
- * Version:           1.0.0
+ * Description:       برنامهٔ همکاری در فروش برای ووکامرس: لینک معرف، ردیابی کلیک، پورسانت بر اساس دسته‌بندی، پنل نماینده و مدیریت تسویه.
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            sirdadfar
@@ -19,11 +19,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WAP_VERSION', '1.0.0' );
+define( 'WAP_VERSION', '1.1.0' );
 define( 'WAP_FILE', __FILE__ );
 define( 'WAP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WAP_URL', plugin_dir_url( __FILE__ ) );
-define( 'WAP_DB_VERSION', '1' );
+define( 'WAP_DB_VERSION', '2' );
 
 /**
  * همان‌طور که ووکامرس توصیه می‌کند، سازگاری با HPOS پیش از load اعلام می‌شود.
